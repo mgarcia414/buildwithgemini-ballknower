@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BALLKNOWER | Weekend Sports Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Material+Symbols+Outlined&display=swap">
+<style>
+  :root {
+    --turf-green-dark: #1b4d24;
+    --turf-green-light: #245e2f;
+    --turf-stripe: #1f5629;
+    --panel-dark: rgba(18, 26, 38, 0.94);
+    --border-color: #2b394e;
+    --accent-blue: #2563eb;
+    --accent-gold: #fbbf24;
+    --channel-col-width: 150px;
+    --slot-width: 190px;
+    --lane-height: 72px;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  
+  /* 8-bit Turf Background */
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--turf-green-dark);
+    /* Pixelated 8-bit turf stripes with pixel hash pattern */
+    background-image: 
+      linear-gradient(rgba(0,0,0,0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.3) 1px, transparent 1px),
+      repeating-linear-gradient(
+        0deg,
+        #1d5227,
+        #1d5227 40px,
+        #256331 40px,
+        #256331 80px
+      );
+    background-size: 8px 8px, 8px 8px, 100% 80px;
+    image-rendering: pixelated;
+  }
+
+  /* Center Brick Wall / Pillar Header */
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1rem 0.5rem;
+    position: relative;
+    z-index: 10;
+    background: rgba(10, 15, 20, 0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 2px solid #334155;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+
+  /* Brick Structure for BALLKNOWER */
+  .brick-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .brick-pillar {
+    background: 
+      linear-gradient(335deg, #782b1d 23px, transparent 23px),
+      linear-gradient(155deg, #9a3412 23px, transparent 23px),
+      linear-gradient(335deg, #782b1d 23px, transparent 23px),
+      linear-gradient(155deg, #9a3412 23px, transparent 23px);
+    background-size: 58px 58px;
+    background-color: #832717;
+    border: 3px solid #431407;
+    border-radius: 8px;
+    padding: 0.5rem 1.8rem;
+    box-shadow: 0 6px 0 #2b0b04, 0 8px 16px rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brick-logo-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.6rem;
+    color: #fef08a;
+    letter-spacing: 2px;
+    text-shadow: 3px 3px 0 #7f1d1d, -2px -2px 0 #450a0a, 4px 4px 0 #000;
+  }
+
+  .nav-arrow-btn {
+    background: #1e293b;
+    border: 2px solid #475569;
+    color: #f8fafc;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    transition: all 0.15s ease;
+  }
+  .nav-arrow-btn:hover {
+    background: #334155;
+    border-color: #94a3b8;
+    transform: scale(1.08);
+  }
+
+  .sub-header-week {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    margin-top: 0.4rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Right Tools / Header Actions */
+  .header-actions {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Favorite Teams Dropdown Component */
+  .team-picker-container {
+    position: relative;
+  }
+  .team-picker-btn {
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #f1f5f9;
+    padding: 0.45rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .team-picker-btn:hover { background: #334155; }
+  .badge-count {
+    background: var(--accent-gold);
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 800;
+    border-radius: 10px;
+    padding: 1px 6px;
+  }
+
+  .team-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 320px;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    display: none;
+    flex-direction: column;
+    z-index: 50;
+    overflow: hidden;
+  }
+  .team-dropdown-menu.open { display: flex; }
+  .team-search-box {
+    padding: 0.6rem;
+    border-bottom: 1px solid #374151;
+    background: #1f2937;
+  }
+  .team-search-input {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid #4b5563;
+    background: #111827;
+    color: #fff;
+    font-size: 0.85rem;
+  }
+  .team-list-scroll {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 0.4rem 0;
+  }
+  .team-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.82rem;
+    color: #e5e7eb;
+    cursor: pointer;
+  }
+  .team-item:hover { background: #1f2937; }
+  .team-item input[type="checkbox"] { cursor: pointer; }
+
+  .chat-toggle-btn {
+    background: var(--accent-blue);
+    border: none;
+    color: #fff;
+    padding: 0.45rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* Main Workspace Layout */
+  .layout-container {
+    flex: 1;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    padding: 0.8rem 1.2rem;
+  }
+
+  /* TV Guide Box with backdrop blur */
+  .guide-viewport {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    position: relative;
+    background: var(--panel-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  }
+
+  .guide-table {
+    display: flex;
+    flex-direction: column;
+    min-width: max-content;
+  }
+
+  /* Time Header Row (PST) */
+  .time-header-row {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    background: #0f172a;
+    border-bottom: 2px solid #334155;
+  }
+  .corner-cell {
+    width: var(--channel-col-width);
+    min-width: var(--channel-col-width);
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    background: #0f172a;
+    position: sticky;
+    left: 0;
+    z-index: 9;
+    border-right: 2px solid #334155;
+  }
+  .time-slots-header { display: flex; }
+  .time-slot-cell {
+    width: var(--slot-width);
+    min-width: var(--slot-width);
+    padding: 0.75rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    border-right: 1px solid #1e293b;
+    text-align: left;
+  }
+
+  /* Channel Rows */
+  .channel-row {
+    display: flex;
+    border-bottom: 1px solid #1e293b;
+    position: relative;
+    /* Height dynamic according to number of overlapping lanes */
+  }
+  .channel-cell {
+    width: var(--channel-col-width);
+    min-width: var(--channel-col-width);
+    background: #111827;
+    border-right: 2px solid #334155;
+    position: sticky;
+    left: 0;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+  }
+  .channel-name {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #fff;
+  }
+  .channel-tag {
+    font-size: 0.7rem;
+    color: var(--accent-gold);
+    font-weight: 600;
+  }
+
+  /* Slots / Events Track */
+  .events-track {
+    display: flex;
+    position: relative;
+    width: calc(var(--slot-width) * 15);
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent calc(var(--slot-width) - 1px),
+      rgba(255,255,255,0.03) calc(var(--slot-width) - 1px),
+      rgba(255,255,255,0.03) var(--slot-width)
+    );
+  }
+
+  /* Game block rendered in an allocated lane */
+  .game-block {
+    position: absolute;
+    height: 60px;
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem;
+    background: #1e293b;
+    border: 1px solid #3b4252;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+  .game-block:hover {
+    border-color: #60a5fa;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+    z-index: 5;
+  }
+  .game-block.favorite {
+    background: linear-gradient(135deg, #1e3a8a, #172554);
+    border: 1px solid #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+  }
+
+  /* UFC Event Window block in the guide */
+  .game-block.ufc-window {
+    background: linear-gradient(135deg, #3b0764 0%, #1e113a 100%);
+    border: 2px solid #a855f7;
+    box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
+    padding: 0.55rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .game-block.ufc-window:hover {
+    border-color: #c084fc;
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.55);
+    transform: translateY(-2px);
+  }
+  .ufc-window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ufc-badge-pill {
+    background: #a855f7;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ufc-window-title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ufc-window-sub {
+    font-size: 0.72rem;
+    color: #e9d5ff;
+    font-weight: 600;
+  }
+  .ufc-window-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(168, 85, 247, 0.3);
+    padding-top: 3px;
+    font-size: 0.7rem;
+    color: #c4b5fd;
+  }
+  .ufc-inspect-hint {
+    color: #fde047;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  /* UFC Fight Card Inspector Sidebar */
+  .ufc-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 460px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #110d21;
+    border-left: 2px solid #a855f7;
+    display: flex;
+    flex-direction: column;
+    z-index: 40;
+    box-shadow: -8px 0 30px rgba(0,0,0,0.75);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ufc-sidebar.collapsed {
+    transform: translateX(100%);
+    display: none;
+  }
+  .ufc-sidebar-header {
+    background: linear-gradient(135deg, #2e1065, #170b2c);
+    padding: 1rem 1.25rem;
+    border-bottom: 2px solid #8b5cf6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ufc-sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .ufc-sidebar-close {
+    background: none;
+    border: none;
+    color: #c4b5fd;
+    font-size: 1.6rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .ufc-sidebar-close:hover { color: #fff; }
+  .ufc-sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  /* Horizontal Bout Matchup Cards */
+  .ufc-bout-card {
+    background: linear-gradient(145deg, #1f1438, #160c2b);
+    border: 1px solid #7c3aed;
+    border-radius: 8px;
+    padding: 0.75rem 0.85rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .ufc-bout-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.25);
+    padding-bottom: 4px;
+  }
+  .ufc-bout-badge {
+    background: rgba(168, 85, 247, 0.25);
+    border: 1px solid #a855f7;
+    color: #e9d5ff;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .ufc-bout-time {
+    color: #fbbf24;
+    font-weight: 800;
+  }
+  .ufc-bout-matchup-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+  .ufc-fighter-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .ufc-fighter-col.left { text-align: left; }
+  .ufc-fighter-col.right { text-align: right; }
+  .ufc-fname {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+  }
+  .ufc-frec {
+    font-size: 0.75rem;
+    color: #c4b5fd;
+    font-weight: 600;
+  }
+  .ufc-vs-badge {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.75rem;
+    color: #fbbf24;
+    text-shadow: 1px 1px 0 #78350f;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+  .ufc-bout-division {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #a78bfa;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* CFB Hover Popover / Game Intel */
+  .cfb-popover {
+    position: absolute;
+    display: none;
+    width: 320px;
+    background: #0f172a;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    padding: 0.85rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.85);
+    z-index: 50;
+    pointer-events: none;
+  }
+  .cfb-popover-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.3rem;
+  }
+  .cfb-popover-line {
+    display: inline-block;
+    background: #1e3a8a;
+    color: #93c5fd;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #3b82f6;
+    margin-bottom: 0.6rem;
+  }
+  .cfb-form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.3rem;
+    border-top: 1px solid #334155;
+    padding-top: 0.45rem;
+  }
+  .cfb-team-form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cfb-team-name-small {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cfb-form-pills {
+    display: flex;
+    gap: 3px;
+  }
+  .form-pill {
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 1px 4px;
+    border-radius: 3px;
+    line-height: 1.2;
+  }
+  .form-pill.w {
+    background: #15803d;
+    color: #86efac;
+    border: 1px solid #22c55e;
+  }
+  .form-pill.l {
+    background: #991b1b;
+    color: #fca5a5;
+    border: 1px solid #ef4444;
+  }
+
+  .game-block-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .game-block-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .favorite-badge {
+    background: var(--accent-gold);
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-right: 4px;
+  }
+  .badge-ufc {
+    background: #c084fc;
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  /* Footer Controls & Legend */
+  .guide-footer {
+    background: rgba(10, 15, 20, 0.9);
+    border-top: 1px solid var(--border-color);
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+  }
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-box { width: 14px; height: 14px; border-radius: 3px; }
+
+  /* Chat Sidebar */
+  .chat-sidebar {
+    width: 380px;
+    background: #0f172a;
+    border-left: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease;
+    z-index: 30;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+  }
+  .chat-sidebar.collapsed { display: none; }
+  .chat-header {
+    background: #1e293b;
+    padding: 0.8rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .chat-title { font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; }
+  .chat-close-btn { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.3rem; }
+  #log { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .msg { margin: 0; }
+  .msg.user { text-align: right; }
+  .bubble {
+    display: inline-block;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    background: #1e293b;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    max-width: 90%;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    color: #e2e8f0;
+  }
+  .msg.user .bubble { background: var(--accent-blue); color: #fff; border: none; }
+  .bubble.rich { background: transparent; border: none; padding: 0; max-width: 100%; white-space: normal; }
+
+  /* A2UI Component Styles */
+  .a2card { border: 1px solid #334155; border-radius: 10px; padding: 0.85rem; background: #1e293b; }
+  .a2col { display: flex; flex-direction: column; gap: 0.4rem; }
+  .a2row { display: flex; flex-direction: row; gap: 0.5rem; align-items: center; }
+  .a2row.between { justify-content: space-between; }
+  .a2text { margin: 0; line-height: 1.4; color: #f1f5f9; }
+  .a2text.a2-h1 { font-size: 1.25rem; font-weight: 700; }
+  .a2text.a2-h2 { font-size: 1.1rem; font-weight: 700; }
+  .a2text.a2-h3 { font-size: 0.95rem; font-weight: 600; }
+  .a2text.a2-caption { font-size: 0.75rem; color: #94a3b8; }
+  .a2divider { border: none; border-top: 1px solid #334155; margin: 0.4rem 0; width: 100%; }
+  .a2img { max-width: 100%; border-radius: 6px; display: block; }
+
+  /* Chat Form */
+  form { display: flex; gap: 0.4rem; padding: 0.8rem; border-top: 1px solid var(--border-color); background: #1e293b; }
+  input#input {
+    flex: 1;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: #0f172a;
+    color: #fff;
+    font-size: 0.9rem;
+  }
+  input#input:focus { outline: 1px solid var(--accent-blue); }
+  button.send-btn {
+    padding: 0.6rem 0.9rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent-blue);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- BALLKNOWER in brick wall style with flanking navigation arrows -->
+  <div class="brick-container">
+    <button class="nav-arrow-btn" id="prev-week-btn" title="Previous Week">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <div class="brick-pillar">
+      <span class="brick-logo-text">BALLKNOWER</span>
+    </div>
+    <button class="nav-arrow-btn" id="next-week-btn" title="Next Week">
+      <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
+  </div>
+  
+  <!-- Subheader with current week date -->
+  <div class="sub-header-week" id="week-label">Loading week...</div>
+
+  <!-- Header Actions (Favorite Teams Picker + Agent Chat Toggle) -->
+  <div class="header-actions">
+    <!-- D1 Favorite Teams Dropdown -->
+    <div class="team-picker-container">
+      <button class="team-picker-btn" id="team-picker-btn">
+        <span class="material-symbols-outlined" style="font-size:18px;color:var(--accent-gold);">star</span>
+        Favorite Teams
+        <span class="badge-count" id="fav-count">3</span>
+      </button>
+      <div class="team-dropdown-menu" id="team-dropdown-menu">
+        <div class="team-search-box">
+          <input type="text" class="team-search-input" id="team-search-input" placeholder="Search 130+ D1 Teams...">
+        </div>
+        <div class="team-list-scroll" id="team-list-scroll">
+          <!-- Populated with D1 teams -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Chat Sidebar Toggle -->
+    <button class="chat-toggle-btn" id="toggle-chat-btn">
+      <span class="material-symbols-outlined" style="font-size:18px;">smart_toy</span> Chat
+    </button>
+  </div>
+</header>
+
+<div class="layout-container">
+  <!-- Interactive TV Guide Grid Viewport -->
+  <div class="guide-viewport" id="guide-viewport">
+    <div class="guide-table">
+      <!-- Top Time Axis (PST) -->
+      <div class="time-header-row">
+        <div class="corner-cell">Channel (PST)</div>
+        <div class="time-slots-header" id="time-slots-header">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Channel Rows Body -->
+      <div id="channel-rows-container">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Floating / Sidebar Chat Panel -->
+  <div class="chat-sidebar collapsed" id="chat-sidebar">
+    <div class="chat-header">
+      <div class="chat-title">
+        <span class="material-symbols-outlined" style="color:var(--accent-blue);font-size:20px;">chat</span>
+        Ballknower Assistant
+      </div>
+      <button class="chat-close-btn" id="close-chat-btn">&times;</button>
+    </div>
+    <div id="log">
+      <div class="msg agent">
+        <div class="bubble">
+          👋 Welcome to Ballknower! Your TV guide is loaded with this weekend's College Football matchups and UFC on Paramount+.
+          <br><br>Click any game card or ask me anything for live alerts, upset odds, or TV guide insights!
+        </div>
+      </div>
+    </div>
+    <form id="form">
+      <input id="input" placeholder="Ask Ballknower about any game…" autocomplete="off">
+      <button class="send-btn" type="submit">Ask</button>
+    </form>
+  </div>
+
+  <!-- UFC Fight Card Inspector Sidebar -->
+  <div class="ufc-sidebar collapsed" id="ufc-sidebar">
+    <div class="ufc-sidebar-header">
+      <div class="ufc-sidebar-title">
+        <span class="material-symbols-outlined" style="color:#c084fc;">sports_mma</span>
+        <span id="ufc-sidebar-card-title">UFC Fight Card</span>
+      </div>
+      <button class="ufc-sidebar-close" id="ufc-sidebar-close">&times;</button>
+    </div>
+    <div class="ufc-sidebar-body" id="ufc-sidebar-body">
+      <!-- Populated dynamically with horizontal matchup cards -->
+    </div>
+  </div>
+</div>
+
+<!-- Floating CFB Hover Popover -->
+<div class="cfb-popover" id="cfb-popover">
+  <div class="cfb-popover-title" id="cfb-pop-title">Georgia Tech vs Miami</div>
+  <div class="cfb-popover-line" id="cfb-pop-line">MIA -10.5 • O/U 54.5</div>
+  <div class="cfb-form-section" id="cfb-pop-form">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<div class="guide-footer">
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-box" style="background:#1e3a8a; border:1px solid #3b82f6;"></div>
+      <span>Selected Favorite Teams</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-box" style="background:#4c1d95; border:1px solid #a855f7;"></div>
+      <span>UFC on Paramount+</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-box" style="background:#1e293b; border:1px solid #3b4252;"></div>
+      <span>Other Games & Matchups</span>
+    </div>
+  </div>
+
+  <div style="font-size: 0.8rem; color: var(--text-muted); display:flex; align-items:center; gap: 0.5rem;">
+    <span>Overlapping broadcasts drop to a new lane inside that channel row.</span>
+    <button class="nav-arrow-btn" style="width:28px;height:28px;" id="scroll-now-btn" title="Scroll to Afternoon (12:30 PM PST)">
+      <span class="material-symbols-outlined" style="font-size:16px;">schedule</span>
+    </button>
+  </div>
+</div>
+
+<script>
+let currentWeekOffset = 0;
+const BASE_HOUR = 8.0; // 8:00 AM PST
+const SLOT_WIDTH = 190; // px per hour
+const LANE_HEIGHT = 70; // px per lane in an expanded station row
+
+// Favorite Teams Management
+// Default selected: Georgia Tech, Fresno State, Notre Dame
+let selectedFavorites = new Set(["Georgia Tech", "Fresno State", "Notre Dame"]);
+let allD1Teams = [];
+
+// Elements
+const weekLabel = document.getElementById("week-label");
+const prevWeekBtn = document.getElementById("prev-week-btn");
+const nextWeekBtn = document.getElementById("next-week-btn");
+const timeSlotsHeader = document.getElementById("time-slots-header");
+const channelRowsContainer = document.getElementById("channel-rows-container");
+const guideViewport = document.getElementById("guide-viewport");
+const toggleChatBtn = document.getElementById("toggle-chat-btn");
+const closeChatBtn = document.getElementById("close-chat-btn");
+const chatSidebar = document.getElementById("chat-sidebar");
+const scrollNowBtn = document.getElementById("scroll-now-btn");
+
+// Favorite Team UI Elements
+const teamPickerBtn = document.getElementById("team-picker-btn");
+const teamDropdownMenu = document.getElementById("team-dropdown-menu");
+const teamSearchInput = document.getElementById("team-search-input");
+const teamListScroll = document.getElementById("team-list-scroll");
+const favCountBadge = document.getElementById("fav-count");
+
+// Chat Elements
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+
+function el(tag, cls, text) { 
+  const e = document.createElement(tag); 
+  if (cls) e.className = cls; 
+  if (text != null) e.textContent = text; 
+  return e; 
+}
+
+function bubble(who) {
+  const m = el("div", "msg " + who);
+  const b = el("div", "bubble");
+  m.appendChild(b); log.appendChild(m); log.scrollTop = log.scrollHeight;
+  return b;
+}
+
+// Check if game involves any of the currently selected favorite teams
+function checkIsFavorite(title) {
+  for (const fav of selectedFavorites) {
+    if (title.toLowerCase().includes(fav.toLowerCase())) return true;
+  }
+  return false;
+}
+
+// Fetch D1 Teams list for dropdown
+async function initTeamPicker() {
+  try {
+    const res = await fetch("/fbs_teams.json");
+    allD1Teams = await res.json();
+  } catch (e) {
+    allD1Teams = [
+      "Georgia Tech Yellow Jackets", "Fresno State Bulldogs", "Notre Dame Fighting Irish",
+      "Alabama Crimson Tide", "Georgia Bulldogs", "Texas Longhorns", "Ohio State Buckeyes",
+      "Oregon Ducks", "Miami Hurricanes", "USC Trojans", "Boise State Broncos", "Michigan Wolverines"
+    ];
+  }
+  renderTeamList();
+}
+
+function renderTeamList(filterText = "") {
+  teamListScroll.innerHTML = "";
+  const filter = filterText.toLowerCase();
+  
+  allD1Teams.forEach(teamName => {
+    if (filter && !teamName.toLowerCase().includes(filter)) return;
+    
+    // Check if team or base name is selected
+    const isChecked = Array.from(selectedFavorites).some(fav => teamName.toLowerCase().includes(fav.toLowerCase()));
+    
+    const item = el("label", "team-item");
+    const cb = el("input");
+    cb.type = "checkbox";
+    cb.checked = isChecked;
+    
+    cb.addEventListener("change", () => {
+      // Extract short name or use full name
+      const shortName = teamName.replace(/\s+(Yellow Jackets|Bulldogs|Fighting Irish|Crimson Tide|Bulldogs|Longhorns|Buckeyes|Ducks|Hurricanes|Trojans|Broncos|Wolverines)$/i, "");
+      if (cb.checked) {
+        selectedFavorites.add(shortName);
+      } else {
+        selectedFavorites.delete(shortName);
+        selectedFavorites.delete(teamName);
+      }
+      favCountBadge.textContent = selectedFavorites.size;
+      // Re-render guide blocks with new favorite badges/styles
+      if (lastGuideData) renderGuideGrid(lastGuideData);
+    });
+
+    item.appendChild(cb);
+    item.appendChild(document.createTextNode(teamName));
+    teamListScroll.appendChild(item);
+  });
+}
+
+// Dropdown toggle
+teamPickerBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  teamDropdownMenu.classList.toggle("open");
+});
+document.addEventListener("click", (e) => {
+  if (!teamDropdownMenu.contains(e.target) && e.target !== teamPickerBtn) {
+    teamDropdownMenu.classList.remove("open");
+  }
+});
+teamSearchInput.addEventListener("input", (e) => {
+  renderTeamList(e.target.value);
+});
+
+// Guide Data Storage
+let lastGuideData = null;
+
+// Fetch & Render Guide
+async function loadGuide(offset) {
+  currentWeekOffset = offset;
+  weekLabel.textContent = "Loading...";
+  try {
+    const res = await fetch(`/api/guide?week_offset=${offset}`);
+    const data = await res.json();
+    lastGuideData = data;
+    renderGuideGrid(data);
+  } catch (err) {
+    weekLabel.textContent = "Error loading guide";
+    console.error(err);
+  }
+}
+
+/**
+ * Greedy Interval Scheduling to assign overlapping games to the FIRST available lane.
+ * If Game 1 ends at 4, Game 2 is 3:30-7, and Game 3 is 4-7:30:
+ * - Lane 0: Game 1 (ends at 4) -> frees up at 4 -> Game 3 takes Lane 0!
+ * - Lane 1: Game 2 (3:30 to 7)
+ * Total lanes = 2, instead of cascading to 3.
+ */
+function assignLanesToEvents(events) {
+  // Sort primarily by start_hour, then end_hour
+  const sorted = [...events].sort((a, b) => a.start_hour - b.start_hour || (a.start_hour + a.duration_hours) - (b.start_hour + b.duration_hours));
+  
+  // laneEndTimes[i] = the hour at which lane i becomes free
+  const laneEndTimes = [];
+  const assigned = [];
+
+  for (const ev of sorted) {
+    const start = ev.start_hour;
+    const end = start + (ev.duration_hours || 3.5);
+
+    // Find the first lane that is free by this event's start time
+    let chosenLane = -1;
+    for (let i = 0; i < laneEndTimes.length; i++) {
+      if (laneEndTimes[i] <= start) {
+        chosenLane = i;
+        laneEndTimes[i] = end;
+        break;
+      }
+    }
+
+    // If no existing lane is free, allocate a new lane
+    if (chosenLane === -1) {
+      chosenLane = laneEndTimes.length;
+      laneEndTimes.push(end);
+    }
+
+    assigned.push({
+      event: ev,
+      lane: chosenLane
+    });
+  }
+
+  return {
+    assigned,
+    totalLanes: Math.max(1, laneEndTimes.length)
+  };
+}
+
+function renderGuideGrid(data) {
+  weekLabel.textContent = data.week_label;
+  
+  // Render Time Axis
+  timeSlotsHeader.innerHTML = "";
+  data.time_slots.forEach(slot => {
+    const d = el("div", "time-slot-cell", slot.label + " PST");
+    timeSlotsHeader.appendChild(d);
+  });
+
+  // Render Channels & Events
+  channelRowsContainer.innerHTML = "";
+  data.channels.forEach(channel => {
+    const channelEvents = data.events.filter(e => e.channel.toLowerCase() === channel.toLowerCase());
+    
+    // Calculate overlapping lanes dynamically
+    const { assigned, totalLanes } = assignLanesToEvents(channelEvents);
+    const laneHeightForChannel = channel === "Paramount+" ? 74 : LANE_HEIGHT;
+    const rowHeight = totalLanes * laneHeightForChannel + 12;
+
+    const row = el("div", "channel-row");
+    row.style.height = `${rowHeight}px`;
+    
+    // Channel Header
+    const chCell = el("div", "channel-cell");
+    chCell.appendChild(el("div", "channel-name", channel));
+    if (channel === "Paramount+") {
+      chCell.appendChild(el("div", "channel-tag", "UFC Fight Night"));
+    } else if (channel === "NBC/Peacock") {
+      chCell.appendChild(el("div", "channel-tag", "CFB Live"));
+    } else {
+      chCell.appendChild(el("div", "channel-tag", totalLanes > 1 ? `CFB (${totalLanes} Feeds)` : "CFB Network"));
+    }
+    row.appendChild(chCell);
+
+    // Events Track
+    const track = el("div", "events-track");
+
+    assigned.forEach(({ event: evt, lane }) => {
+      const isFav = checkIsFavorite(evt.title);
+      const block = el("div", "game-block");
+      if (isFav) block.classList.add("favorite");
+
+      // Positioning: start_hour relative to 8 AM
+      const startOffsetHours = Math.max(0, evt.start_hour - BASE_HOUR);
+      const leftPx = startOffsetHours * SLOT_WIDTH;
+      const widthPx = Math.max(120, (evt.duration_hours || 3.5) * SLOT_WIDTH - 6);
+      const topPx = 5 + (lane * laneHeightForChannel);
+
+      block.style.left = `${leftPx}px`;
+      block.style.width = `${widthPx}px`;
+      block.style.top = `${topPx}px`;
+
+      if (evt.is_ufc_window) {
+        block.classList.add("ufc-window");
+        block.style.height = "64px";
+
+        // Header Row
+        const ufcHeader = el("div", "ufc-window-header");
+        ufcHeader.appendChild(el("div", "ufc-window-title", evt.title));
+        ufcHeader.appendChild(el("span", "ufc-badge-pill", evt.card_segment || "UFC"));
+        block.appendChild(ufcHeader);
+
+        // Subtitle / Featured
+        const ufcSub = el("div", "ufc-window-sub", evt.subtitle || evt.featured_bout || "6 Bouts");
+        block.appendChild(ufcSub);
+
+        // Footer Row
+        const ufcFooter = el("div", "ufc-window-footer");
+        ufcFooter.appendChild(el("span", null, evt.time_display));
+        const hint = el("span", "ufc-inspect-hint");
+        hint.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">visibility</span> View Card';
+        ufcFooter.appendChild(hint);
+        block.appendChild(ufcFooter);
+
+        // Click opens UFC Fight Card Inspector Sidebar
+        block.addEventListener("click", () => {
+          openUfcSidebar(evt);
+        });
+
+      } else {
+        // Standard CFB Block
+        const titleRow = el("div", "game-block-title");
+        if (isFav) {
+          const badge = el("span", "favorite-badge", "FAV");
+          titleRow.appendChild(badge);
+        }
+        titleRow.appendChild(document.createTextNode(evt.title));
+        block.appendChild(titleRow);
+
+        // Meta row
+        const metaRow = el("div", "game-block-meta");
+        metaRow.appendChild(el("span", null, evt.time_display));
+        metaRow.appendChild(el("span", null, evt.betting_line ? evt.betting_line.split("•")[0] : (evt.status || "Scheduled")));
+        block.appendChild(metaRow);
+
+        // Hover Popover for CFB games (Betting line & Last 5 games)
+        block.addEventListener("mouseenter", (e) => {
+          showCfbPopover(evt, e);
+        });
+        block.addEventListener("mousemove", (e) => {
+          positionCfbPopover(e);
+        });
+        block.addEventListener("mouseleave", () => {
+          hideCfbPopover();
+        });
+
+        // Clicking CFB block asks agent
+        block.addEventListener("click", () => {
+          ufcSidebar.classList.add("collapsed");
+          chatSidebar.classList.remove("collapsed");
+          input.value = `Tell me more about ${evt.title} on ${evt.channel} (Betting line: ${evt.betting_line || 'N/A'})`;
+          form.dispatchEvent(new Event("submit"));
+        });
+      }
+
+      track.appendChild(block);
+    });
+
+    row.appendChild(track);
+    channelRowsContainer.appendChild(row);
+  });
+}
+
+// UFC Sidebar Inspector Logic
+const ufcSidebar = document.getElementById("ufc-sidebar");
+const ufcSidebarTitle = document.getElementById("ufc-sidebar-card-title");
+const ufcSidebarBody = document.getElementById("ufc-sidebar-body");
+const ufcSidebarClose = document.getElementById("ufc-sidebar-close");
+
+ufcSidebarClose.addEventListener("click", () => {
+  ufcSidebar.classList.add("collapsed");
+});
+
+function openUfcSidebar(evt) {
+  // If chat is open, collapse it so UFC drawer has primary focus
+  chatSidebar.classList.add("collapsed");
+  ufcSidebarTitle.textContent = `${evt.title} (${evt.bouts ? evt.bouts.length : 0} Bouts)`;
+  ufcSidebarBody.innerHTML = "";
+
+  if (!evt.bouts || evt.bouts.length === 0) {
+    ufcSidebarBody.innerHTML = "<div style='color:#94a3b8;padding:1rem;'>No bouts scheduled.</div>";
+  } else {
+    evt.bouts.forEach(b => {
+      const card = el("div", "ufc-bout-card");
+
+      // Top row: Bout number badge + Estimated walk time
+      const topRow = el("div", "ufc-bout-top");
+      topRow.appendChild(el("span", "ufc-bout-badge", b.status || `Bout #${b.bout_number}`));
+      topRow.appendChild(el("span", "ufc-bout-time", `Walk: ${b.time_display}`));
+      card.appendChild(topRow);
+
+      // Horizontal Matchup: Fighter 1 on left, VS in center, Fighter 2 on right
+      const matchRow = el("div", "ufc-bout-matchup-horizontal");
+      
+      const leftCol = el("div", "ufc-fighter-col left");
+      leftCol.appendChild(el("div", "ufc-fname", b.fighter1 ? b.fighter1.name : "Fighter 1"));
+      leftCol.appendChild(el("div", "ufc-frec", b.fighter1 ? b.fighter1.record : ""));
+      matchRow.appendChild(leftCol);
+
+      matchRow.appendChild(el("div", "ufc-vs-badge", "VS."));
+
+      const rightCol = el("div", "ufc-fighter-col right");
+      rightCol.appendChild(el("div", "ufc-fname", b.fighter2 ? b.fighter2.name : "Fighter 2"));
+      rightCol.appendChild(el("div", "ufc-frec", b.fighter2 ? b.fighter2.record : ""));
+      matchRow.appendChild(rightCol);
+
+      card.appendChild(matchRow);
+
+      // Division / Weight Class
+      const divRow = el("div", "ufc-bout-division", b.weight_class || "Weight Class TBA");
+      card.appendChild(divRow);
+
+      // Click bout to ask Ballknower
+      card.style.cursor = "pointer";
+      card.title = "Click to ask Ballknower fight preview";
+      card.addEventListener("click", () => {
+        chatSidebar.classList.remove("collapsed");
+        input.value = `Who wins between ${b.fighter1.name} and ${b.fighter2.name} at ${evt.title}? Give me a prediction.`;
+        form.dispatchEvent(new Event("submit"));
+      });
+
+      ufcSidebarBody.appendChild(card);
+    });
+  }
+
+  ufcSidebar.classList.remove("collapsed");
+}
+
+// CFB Hover Popover Logic
+const cfbPopover = document.getElementById("cfb-popover");
+const cfbPopTitle = document.getElementById("cfb-pop-title");
+const cfbPopLine = document.getElementById("cfb-pop-line");
+const cfbPopForm = document.getElementById("cfb-pop-form");
+
+function showCfbPopover(evt, e) {
+  cfbPopTitle.textContent = evt.title;
+  cfbPopLine.textContent = evt.betting_line ? `Betting Line: ${evt.betting_line}` : "Line: OFF";
+  cfbPopForm.innerHTML = "";
+
+  const renderTeamForm = (team) => {
+    if (!team) return;
+    const row = el("div", "cfb-team-form-row");
+    row.appendChild(el("span", "cfb-team-name-small", team.name));
+    
+    const pillsWrap = el("div", "cfb-form-pills");
+    if (team.last5 && team.last5.length > 0) {
+      team.last5.forEach(g => {
+        const p = el("span", `form-pill ${g.res.toLowerCase()}`);
+        p.textContent = `${g.week} ${g.opp} ${g.res}`;
+        p.title = `${g.week} vs ${g.opp}: ${g.res} (${g.score})`;
+        pillsWrap.appendChild(p);
+      });
+    } else {
+      pillsWrap.textContent = "Recent: N/A";
+    }
+    row.appendChild(pillsWrap);
+    cfbPopForm.appendChild(row);
+  };
+
+  renderTeamForm(evt.team1);
+  renderTeamForm(evt.team2);
+
+  positionCfbPopover(e);
+  cfbPopover.style.display = "block";
+}
+
+function positionCfbPopover(e) {
+  const popWidth = 340;
+  const popHeight = 160;
+  let left = e.clientX + 15;
+  let top = e.clientY + 15;
+
+  if (left + popWidth > window.innerWidth) {
+    left = e.clientX - popWidth - 10;
+  }
+  if (top + popHeight > window.innerHeight) {
+    top = e.clientY - popHeight - 10;
+  }
+
+  cfbPopover.style.left = `${left}px`;
+  cfbPopover.style.top = `${top}px`;
+}
+
+function hideCfbPopover() {
+  cfbPopover.style.display = "none";
+}
+
+// Navigation Events
+prevWeekBtn.addEventListener("click", () => loadGuide(currentWeekOffset - 1));
+nextWeekBtn.addEventListener("click", () => loadGuide(currentWeekOffset + 1));
+scrollNowBtn.addEventListener("click", () => {
+  guideViewport.scrollTo({ left: SLOT_WIDTH * 4.5, behavior: "smooth" }); // ~12:30 PM PST
+});
+
+toggleChatBtn.addEventListener("click", () => {
+  chatSidebar.classList.toggle("collapsed");
+  if (!chatSidebar.classList.contains("collapsed")) {
+    ufcSidebar.classList.add("collapsed");
+  }
+});
+closeChatBtn.addEventListener("click", () => {
+  chatSidebar.classList.add("collapsed");
+});
+
+/* A2UI Mini Renderer */
+function boundStr(v) {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  if (typeof v.literalString === "string") return v.literalString;
+  return "";
+}
+
+function childIds(props) {
+  const ids = [];
+  if (props && typeof props.child === "string") ids.push(props.child);
+  const ch = props && props.children;
+  if (ch && Array.isArray(ch.explicitList)) for (const c of ch.explicitList) if (typeof c === "string") ids.push(c);
+  return ids;
+}
+
+function buildNode(id, comps, seen) {
+  if (!id || seen.has(id)) return null;
+  seen.add(id);
+  const spec = comps[id];
+  if (!spec || typeof spec !== "object") return null;
+  const type = Object.keys(spec)[0];
+  const props = spec[type] || {};
+  const kids = () => childIds(props).map(cid => buildNode(cid, comps, seen)).filter(Boolean);
+
+  switch (type) {
+    case "Card": {
+      const d = el("div", "a2card"); kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Column":
+    case "List": {
+      const d = el("div", "a2col"); kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Row": {
+      const d = el("div", "a2row" + (props.distribution === "spaceBetween" ? " between" : ""));
+      kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Text": {
+      const t = el("div", "a2text");
+      const hint = String(props.usageHint || "body").toLowerCase();
+      if (["h1", "h2", "h3"].includes(hint)) t.classList.add("a2-" + hint);
+      else if (hint === "caption") t.classList.add("a2-caption");
+      t.textContent = boundStr(props.text);
+      return t;
+    }
+    case "Divider": return el("hr", "a2divider");
+    case "Image": {
+      const src = boundStr(props.url || props.src);
+      if (!/^https?:\/\//i.test(src)) return null;
+      const img = el("img", "a2img"); img.src = src; return img;
+    }
+    default: return null;
+  }
+}
+
+function renderSurface(messages, container) {
+  const comps = {};
+  const roots = [];
+  for (const m of messages) {
+    if (m.beginRendering && typeof m.beginRendering.root === "string") roots.push(m.beginRendering.root);
+    const su = m.surfaceUpdate;
+    if (su && Array.isArray(su.components)) for (const c of su.components) if (c && c.id && c.component) comps[c.id] = c.component;
+  }
+  let rootIds = roots.filter(r => comps[r]);
+  if (rootIds.length === 0) {
+    const referenced = new Set();
+    for (const id in comps) { const spec = comps[id]; childIds(spec[Object.keys(spec)[0]] || {}).forEach(c => referenced.add(c)); }
+    rootIds = Object.keys(comps).filter(id => !referenced.has(id));
+  }
+  let drew = false;
+  for (const rid of rootIds) { const node = buildNode(rid, comps, new Set()); if (node) { container.appendChild(node); drew = true; } }
+  return drew;
+}
+
+function renderReply(b, parts) {
+  b.textContent = "";
+  const texts = parts.filter(p => p && (p.kind === "text" || (!p.kind && p.text))).map(p => p.text || "");
+  const a2ui = parts.filter(p => p && p.kind === "a2ui" && p.data).map(p => p.data);
+
+  const textStr = texts.join("\n").trim();
+  if (textStr) b.appendChild(el("div", null, textStr));
+
+  if (a2ui.length) {
+    b.classList.add("rich");
+    renderSurface(a2ui, b);
+  }
+  if (!b.childNodes.length) b.textContent = "(no response)";
+  log.scrollTop = log.scrollHeight;
+}
+
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+  bubble("user").textContent = text;
+  input.value = "";
+  const b = bubble("agent"); b.textContent = "Thinking…";
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { throw new Error(`Server returned non-JSON: ${raw.slice(0, 150)}`); }
+    renderReply(b, data.parts || []);
+  } catch (e) {
+    b.textContent = "Error: " + e.message;
+  }
+});
+
+// Initial boot
+initTeamPicker();
+loadGuide(0);
+</script>
+</body>
+</html>
