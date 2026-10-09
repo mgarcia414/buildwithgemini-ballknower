@@ -24,7 +24,7 @@ This public repository can use GitHub Pages on GitHub Free. No build, npm instal
 4. Select your updated branch and the **/docs** folder, then save.
 5. Open the URL GitHub reports after deployment completes.
 
-The expected project address is `https://mgarcia414.github.io/buildwithgemini-ballknower/`; it is not live until Pages is enabled and deployment succeeds. Relative file paths support the repository subdirectory. The `docs/` folder can also be uploaded to any static host, subject to that provider's terms.
+[Open the live guide](https://mgarcia414.github.io/buildwithgemini-ballknower/). GitHub Pages publishes the `/docs` folder from the `AgentFree` branch. Relative file paths support the repository subdirectory. The `docs/` folder can also be uploaded to any static host, subject to that provider's terms.
 
 [GitHub Pages availability and documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages).
 
