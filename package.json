@@ -1,0 +1,9 @@
+{
+  "name": "ballknower-static",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A direct-API CFB and UFC television guide with no paid backend",
+  "scripts": { "test": "node --test", "start": "python serve.py" },
+  "engines": { "node": ">=22" }
+}
